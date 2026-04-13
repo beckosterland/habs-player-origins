@@ -1,0 +1,613 @@
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300&display=swap');
+
+/* ── NHL Montreal font ────────────────────────────────────────────────────────
+   Place font files in public/fonts/ so they are served at /fonts/...
+   ─────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'NHL-Montreal';
+  src: url('/fonts/NHL Montreal Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── Reset / root ─────────────────────────────────────────────────────────── */
+.globe-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  background: #f0ebe3;
+  color: #1a1a1a;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  overflow: hidden;
+}
+
+/* 
+.map-sphere      { fill: #b8d9ed; }
+.map-graticule   { fill: none; stroke: #cce0ee; stroke-width: 0.4px; }
+.map-land        { fill: #e8e2d5; stroke: #b5a98a; stroke-width: 0.4px; }
+.map-subnational { fill: none; stroke: #b5a98a; stroke-width: 0.35px; stroke-dasharray: 3 2; opacity: 0.7; }
+.map-lakes       { fill: #b8d9ed; stroke: #9ac4de; stroke-width: 0.3px; }
+.map-borders     { fill: none; stroke: #9d9278; stroke-width: 0.5px; } */
+
+/* ── Map layer colours (applied via D3 .attr('class', ...)) ──────────────── */
+.map-sphere      { fill: #eef3f6; }
+.map-graticule   { fill: none; stroke: #012e89; stroke-width: 0.8px; }
+.map-land        { fill: #c90628; stroke: #ec3d5a; stroke-width: 0.4px; }
+.map-subnational { fill: none; stroke: #ec3d5a; stroke-width: 0.35px; stroke-dasharray: 3 2; opacity: 0.7; }
+.map-lakes       { fill: #eef3f6; stroke: #9ac4de; stroke-width: 0.3px; }
+.map-borders     { fill: none; stroke: #ec3d5a; stroke-width: 0.5px; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.globe-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px 6px;
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.globe-logo {
+  height: 64px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.globe-header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.globe-header h1 {
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 1.85rem;
+  letter-spacing: 0.01em;
+  color: #AF1E2D;
+  margin: 0 0 3px;
+  line-height: 1.1;
+}
+
+.globe-header p {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Timeline ────────────────────────────────────────────────────────────── */
+.timeline-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 10px 16px 6px;
+  flex-shrink: 0;
+}
+.loading-msg { font-size: 0.8rem; color: #6b7280; display: block; margin-bottom: 6px; }
+.error-msg   { font-size: 0.8rem; color: #b91c1c; display: block; margin-bottom: 6px; }
+
+.timeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #c5bdb0 transparent;
+}
+.timeline::-webkit-scrollbar       { height: 3px; }
+.timeline::-webkit-scrollbar-thumb { background: #b91c1c; border-radius: 2px; }
+
+/* Wrapper that stacks a season button above an optional cup banner */
+.season-cell {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cup-banner {
+  height: 48px;
+  width: auto;
+  display: block;
+  opacity: 0.9;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.cup-banner:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.season-btn {
+  flex-shrink: 0;
+  background: #f5f8fa;
+  color: #6b7280;
+  border: 1px solid #d4cfc6;
+  border-radius: 4px;
+  padding: 4px 7px;
+  font-size: 0.68rem;
+  font-family: 'DM Sans','Segoe UI', system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  line-height: 1.4;
+}
+.season-btn:hover  { background: #ddd8cf; color: #1a1a1a; border-color: #b5a98a; }
+.season-btn.active { background: #AF1E2D; color: #fff; border-color: #AF1E2D; font-weight: 600; }
+
+.all-btn { background: #192168; color: #c7d2fe; border-color: #192168; padding: 4px 12px; font-weight: 600; font-size: 0.72rem; }
+.all-btn:hover  { background: #1e2d8a; color: #fff; border-color: #2a3ea0; }
+.all-btn.active { background: #2a3ea0; color: #fff; border-color: #2a3ea0; }
+
+.decade-sep {
+  flex-shrink: 0;
+  color: #AF1E2D;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0 5px 0 8px;
+  user-select: none;
+}
+
+/* ── Globe container ─────────────────────────────────────────────────────── */
+.globe-container {
+  flex: 1;
+  width: 100%;
+  min-height: 440px;
+  max-height: calc(100vh - 210px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.globe-svg         { display: block; cursor: grab; }
+.globe-svg:active  { cursor: grabbing; }
+.player-dot        { transition: r 0.1s; }
+.player-dot:hover  { r: 7; }
+
+/* ── Info bar ─────────────────────────────────────────────────────────────── */
+.info-bar {
+  flex-shrink: 0;
+  padding: 6px 16px 14px;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+}
+.info-bar .season-label-text { color: #374151; font-weight: 500; }
+.info-bar .sep               { margin: 0 6px; color: #b5a98a; }
+.info-bar .count             { font-weight: 700; }
+.info-bar .hint              { color: #b5a98a; }
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(252, 249, 245, 0.98);
+  border: 1px solid #d4cfc6;
+  border-radius: 10px;
+  padding: 12px 14px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 999;
+  width: 210px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(175,30,45,0.12);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Jersey number — top-right, NHL Montreal font */
+.tt-jersey {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-family: 'NHL-Montreal', 'Impact', 'Arial Black', sans-serif;
+  font-size: 1.4rem;
+  color: #ffffff;
+  -webkit-text-stroke: 2px #192168;
+  paint-order: stroke fill;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Headshot */
+.tt-img {
+  display: block;
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #AF1E2D;
+  margin: 0 auto 8px;
+  background: #e8e2d5;
+}
+
+/* Player name */
+.tt-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Info rows (birthplace, birthdate) */
+.tt-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 6px;
+}
+.tt-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #AF1E2D;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.tt-value {
+  font-size: 0.77rem;
+  color: #374151;
+  line-height: 1.3;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* ── Cluster tooltip ─────────────────────────────────────────────────────── */
+
+/* Pinned state — amber highlight border */
+.tooltip.pinned {
+  border-color: #d97706;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(217,119,6,0.35);
+}
+
+/* Header row: label + close button side by side */
+.tt-cluster-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d4cfc6;
+}
+
+.tt-cluster-header {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #92400e;
+  flex: 1;
+  line-height: 1.3;
+}
+
+/* × close button inside pinned cluster tooltip */
+.tt-cluster-close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: #ede8e0;
+  border: 1px solid #d4cfc6;
+  border-radius: 50%;
+  color: #6b7280;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.1s, color 0.1s;
+}
+.tt-cluster-close:hover { background: #AF1E2D; color: #fff; border-color: #AF1E2D; }
+
+.tt-cluster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tt-cluster-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.tt-cluster-item:hover { background: #e8e2d5; }
+
+.tt-mini-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #AF1E2D;
+  object-fit: cover;
+  background: #e8e2d5;
+  flex-shrink: 0;
+}
+
+.tt-mini-info  { min-width: 0; }
+.tt-mini-name  { font-size: 0.75rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt-mini-sub   { font-size: 0.68rem; color: #6b7280; margin-top: 1px; }
+
+.tt-cluster-more {
+  font-size: 0.68rem;
+  color: #6b7280;
+  margin-top: 6px;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ── Player detail panel ─────────────────────────────────────────────────── */
+.player-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 290px;
+  background: rgba(252, 249, 245, 0.99);
+  border-left: 1px solid #d4cfc6;
+  z-index: 200;
+  overflow-y: auto;
+  padding: 52px 20px 28px;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+  animation: slideInPanel 0.25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: #c5bdb0 transparent;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+.player-panel::-webkit-scrollbar       { width: 4px; }
+.player-panel::-webkit-scrollbar-thumb { background: #c5bdb0; border-radius: 2px; }
+
+@keyframes slideInPanel {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* Close button */
+.panel-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  background: #ede8e0;
+  border: 1px solid #d4cfc6;
+  border-radius: 50%;
+  color: #6b7280;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+}
+.panel-close:hover { background: #AF1E2D; color: #fff; border-color: #AF1E2D; }
+
+/* Headshot */
+.panel-headshot-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.panel-headshot {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #AF1E2D;
+  background: #e8e2d5;
+}
+
+/* Jersey number — NHL Montreal font, large */
+.panel-jersey {
+  font-family: 'NHL-Montreal', 'Impact', 'Arial Black', sans-serif;
+  font-size: 2.6rem;
+  color: #ffffff;
+  -webkit-text-stroke: 3px #192168;
+  paint-order: stroke fill;
+  text-align: center;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+/* Name */
+.panel-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+/* Position */
+.panel-position {
+  font-size: 0.78rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.panel-divider {
+  height: 1px;
+  background: #d4cfc6;
+  margin: 14px 0;
+}
+
+/* Sections */
+.panel-section       { margin-bottom: 2px; }
+.panel-section-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #AF1E2D;
+  margin-bottom: 8px;
+}
+
+/* Label/value rows */
+.panel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.panel-row-label {
+  font-size: 0.72rem;
+  color: #6b7280;
+  flex-shrink: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.panel-row-value {
+  font-size: 0.75rem;
+  color: #374151;
+  text-align: right;
+  line-height: 1.3;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* Stats grid — 3 columns */
+.panel-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.panel-stat {
+  background: #ede8e0;
+  border: 1px solid #d4cfc6;
+  border-radius: 6px;
+  padding: 8px 4px 6px;
+  text-align: center;
+}
+.panel-stat-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.panel-stat-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+}
+
+/* ── Touch — prevent browser scroll/zoom hijacking the map ───────────────── */
+.globe-svg { touch-action: none; }
+
+/* ── Mobile layout (phones ≤ 640px) ─────────────────────────────────────── */
+@media (max-width: 640px) {
+
+  html, body, #root {
+    height: 100dvh;          /* dynamic viewport height avoids mobile chrome gaps */
+    overflow: hidden;
+  }
+
+  .globe-wrapper {
+    min-height: 100dvh;
+  }
+
+  /* ── Header ── */
+  .globe-header {
+    padding: 8px 12px 4px;
+    gap: 10px;
+  }
+  .globe-logo {
+    height: 40px;
+  }
+  .globe-header h1 {
+    font-size: 1.15rem;
+  }
+  .globe-header p {
+    display: none;           /* hide subtitle — not enough room */
+  }
+
+  /* ── Timeline ── */
+  .timeline-wrapper {
+    padding: 4px 10px 2px;
+  }
+  .cup-banner {
+    height: 22px;            /* was 48px on desktop */
+  }
+  .decade-sep {
+    font-size: 0.55rem;
+    padding: 0 3px 0 5px;
+  }
+
+  /* ── Globe ── */
+  .globe-container {
+    min-height: 180px;
+    max-height: calc(100dvh - 140px);
+  }
+
+  /* ── Info bar ── */
+  .info-bar {
+    padding: 3px 12px 6px;
+    font-size: 0.68rem;
+  }
+  .info-bar .hint { display: none; } /* "Drag to pan · Scroll to zoom" irrelevant on touch */
+
+  /* ── Tooltip — clamp width so it never bleeds off screen ── */
+  .tooltip {
+    width: calc(100vw - 32px);
+    max-width: 280px;
+  }
+
+  /* ── Player panel — full-width bottom sheet instead of side panel ── */
+  .player-panel {
+    width: 100%;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 76dvh;
+    border-left: none;
+    border-top: 1px solid #d4cfc6;
+    border-radius: 18px 18px 0 0;
+    padding: 8px 20px 32px;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+    animation: slideUpPanel 0.28s ease;
+  }
+
+  /* Drag-handle pill at top of bottom sheet */
+  .player-panel::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: #c5bdb0;
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+
+  @keyframes slideUpPanel {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Slightly smaller headshot + jersey in the compact panel */
+  .panel-headshot { width: 78px; height: 78px; }
+  .panel-jersey   { font-size: 2rem; }
+  .panel-name     { font-size: 0.95rem; }
+}
