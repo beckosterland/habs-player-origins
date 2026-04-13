@@ -737,7 +737,7 @@ export default function Globe() {
       <header className="globe-header">
         <img
           className="globe-logo"
-          src="/Logo_Canadiens_de_Montr%C3%A9al_1926-1952.svg"
+          src={`${import.meta.env.BASE_URL}Logo_Canadiens_de_Montr%C3%A9al_1926-1952.svg`}
           alt="Canadiens de Montréal crest"
         />
         <div className="globe-header-text">
@@ -773,7 +773,7 @@ export default function Globe() {
                   </button>
                   {isCup && (
                     <img
-                      src="/banner-habs-cropped.svg"
+                      src={`${import.meta.env.BASE_URL}banner-habs-cropped.svg`}
                       className="cup-banner"
                       alt="Stanley Cup"
                       title={`${longSeason(season)} Stanley Cup Champions`}
