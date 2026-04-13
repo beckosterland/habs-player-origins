@@ -2,7 +2,7 @@
 
 An interactive world map visualising every player to wear the *bleu-blanc-rouge*, tracing the arc from their birthplace to the Canadiens' home arena for that season.
 
-![Montréal Canadiens crest](public/favicon-ch.svg)
+![Montréal Canadiens crest](public/website_screenshot.png)
 
 ---
 
