@@ -7,8 +7,9 @@ import './Globe.css'
 const WORLD_URL      = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 const LAKES_URL      = 'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@5.1.2/geojson/ne_50m_lakes.geojson'
 const SUBNATIONAL_URL = 'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@5.1.2/geojson/ne_110m_admin_1_states_provinces.geojson'
-const PLAYERS_URL = '/data/mtl_historical_players.csv'
-const ARENAS_URL  = '/data/mtl_arenas.csv'
+// import.meta.env.BASE_URL is '/' in dev and '/habs-player-origins/' in production
+const PLAYERS_URL = `${import.meta.env.BASE_URL}data/mtl_historical_players.csv`
+const ARENAS_URL  = `${import.meta.env.BASE_URL}data/mtl_arenas.csv`
 
 const CH_RED  = '#AF1E2D'
 const CH_BLUE = '#192168'

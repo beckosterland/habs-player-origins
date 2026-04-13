@@ -30,5 +30,6 @@ function serveDataDir() {
 }
 
 export default defineConfig({
+  base: '/habs-player-origins/',   // must match your GitHub repo name exactly
   plugins: [react(), serveDataDir()],
 })
